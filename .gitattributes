@@ -1,0 +1,9 @@
+# DO NOT EDIT: File is auto-generated
+* -text
+*.md text
+*.rs text
+*.toml text
+.gitattributes text
+.gitignore text
+.ruby-version text
+Gemfile text
