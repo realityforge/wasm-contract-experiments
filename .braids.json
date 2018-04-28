@@ -1,0 +1,10 @@
+{
+  "config_version": 1,
+  "mirrors": {
+    "vendor/pwasm-tutorial": {
+      "url": "https://github.com/paritytech/pwasm-tutorial.git",
+      "branch": "master",
+      "revision": "028b5170c478f1e84860ec8b663059e3391a49dc"
+    }
+  }
+}
