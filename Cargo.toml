@@ -7,6 +7,10 @@ authors = ["Peter Donald <peter@realityforge.org>"]
 pwasm-std = "0.6"
 pwasm-ethereum = "0.3"
 
+[dependencies.parity-hash]
+version = "1"
+default-features = false
+
 [lib]
 crate-type = ["cdylib"]
 
