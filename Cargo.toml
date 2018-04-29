@@ -6,6 +6,12 @@ authors = ["Peter Donald <peter@realityforge.org>"]
 [dependencies]
 pwasm-std = "0.6"
 pwasm-ethereum = "0.3"
+pwasm-abi = "0.1"
+pwasm-abi-derive = "0.1"
+
+[dependencies.bigint]
+version = "4"
+default-features = false
 
 [dependencies.parity-hash]
 version = "1"

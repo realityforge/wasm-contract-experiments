@@ -1,27 +1,64 @@
 // Contract doesn't use Rust's standard library
 #![no_std]
+#![allow(non_snake_case)]
+#![feature(proc_macro)]
 
 // `pwasm-ethereum` implements bindings to the runtime
 extern crate pwasm_ethereum;
 extern crate parity_hash;
+extern crate pwasm_std;
+extern crate pwasm_abi;
+extern crate pwasm_abi_derive;
+/// Bigint used for 256-bit arithmetic
+extern crate bigint;
 
-use parity_hash::H256;
+// Declares the dispatch and dispatch_ctor methods
+use pwasm_abi::eth::EndpointInterface;
+
+pub mod token {
+  use bigint::U256;
+  use parity_hash::H256;
+  // eth_abi is a procedural macros https://doc.rust-lang.org/book/first-edition/procedural-macros.html
+  use pwasm_abi_derive::eth_abi;
+  use pwasm_ethereum;
+  use pwasm_std::Vec;
+
+  static TOTAL_SUPPLY_KEY: H256 = H256([2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+  #[eth_abi(TokenEndpoint, TokenClient)]
+  pub trait TokenInterface {
+    /// The constructor
+    fn constructor(&mut self, _total_supply: U256);
+    /// Total amount of tokens
+    #[constant]
+    fn totalSupply(&mut self) -> U256;
+  }
+
+  pub struct TokenContract;
+
+  impl TokenInterface for TokenContract {
+    fn constructor(&mut self, total_supply: U256) {
+      // Set up the total supply for the token
+      pwasm_ethereum::write(&TOTAL_SUPPLY_KEY, &total_supply.into());
+    }
+
+    fn totalSupply(&mut self) -> U256 {
+      pwasm_ethereum::read(&TOTAL_SUPPLY_KEY).into()
+    }
+  }
+}
 
 // The "deploy" will be executed only once on deployment but will not be stored on the blockchain
 #[no_mangle]
 pub fn deploy() {
-  // Lets set the sender address to the contract storage at address "0"
-  pwasm_ethereum::write(&H256::zero().into(), &H256::from(pwasm_ethereum::sender()).into());
-  // Note we should't write any result into the call descriptor in deploy.
+  let mut endpoint = token::TokenEndpoint::new(token::TokenContract{});
+  endpoint.dispatch_ctor(&pwasm_ethereum::input());
 }
 
-// The following code will be stored on the blockchain.
+// This code will be stored on blockchain
 #[no_mangle]
 pub fn call() {
-  // This contract will return the address from which it was deployed
-
-  // Will read the address of the deployer which we wrote to the storage on the deploy stage
-  let owner = pwasm_ethereum::read(&H256::zero().into());
-  // Send a result pointer to the runtime
-  pwasm_ethereum::ret(owner.as_ref());
+  let mut endpoint = token::TokenEndpoint::new(token::TokenContract{});
+  // Read http://solidity.readthedocs.io/en/develop/abi-spec.html#formal-specification-of-the-encoding for details
+  pwasm_ethereum::ret(&endpoint.dispatch(&pwasm_ethereum::input()));
 }
