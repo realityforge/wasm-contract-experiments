@@ -9,10 +9,18 @@ The commands to setup environment:
     $ rustup target add wasm32-unknown-unknowns
     $ cargo install -f pwasm-utils
 
+    # add the formatting tool
+    $ rustup component add rustfmt-preview
+    $ rustup component add rustfmt-preview --toolchain nightly
+
 The commands to build:
 
     $ cargo build --release --target wasm32-unknown-unknown
     $ wasm-build --target=wasm32-unknown-unknown ./target wasm-contract-experiments
+
+To format code according to rust standard use:
+
+    $ cargo +nightly fmt
 
 # References
 
